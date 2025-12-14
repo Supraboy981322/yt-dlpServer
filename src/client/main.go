@@ -100,8 +100,9 @@ func init() {
 			server = args[i+1]
 			taken = append(taken, i+1)
 		 case "v", "-verbose": verbose = true //verbose log level
-		 default: //invalid arg
-			fmt.Fprintf(os.Stderr, "invalid arg:  %s", a)
+		 case "h", "-help": help()
+		 default: //assume it's the url
+		  url = a
 		}
 	}
 }
@@ -109,4 +110,28 @@ func init() {
 func main() {
 	vLog("server: "+server)
 	erorF("todo", errors.New("finish the client"))
+}
+
+func help() {
+	lines := []string{
+		"yt-dlp server (working name) --> help",
+		"  -h, --help",
+		"    this screen",
+		"  -v, --verbose",
+		"    show verbose output",
+		"  -f, --format, --fmt",
+		"    file format",
+		"  -o, --output",
+		"    output file name (extension is appended to end, so don't put it here)",
+		"  -s, --server",
+		"    over-ride server address",
+		"  -a, --args, --extra-args",
+		"    additional args passed to yt-dlp on the server",
+		"  -u, -l, --url, --link",
+		"    video url",
+	}
+	for _, l := range lines {
+		fmt.Println(l)
+	}
+	os.Exit(0)
 }
