@@ -45,6 +45,13 @@ func init() {
 		confPath = filepath.Join(confDir, "config.gomn")
 	}; vLog("built config path")
 
+	{ vLog("ensuring config exists")
+		if err := ensureConf(); err != nil {
+			vLog("encountered err...")
+			erorF("failed to ensure config exists", err)
+		} else { vLog("no err") }
+	}
+
 	vLog("reading config")
 	conf, err = gomn.ParseFile(confPath)
 	if err != nil { erorF("failed to read config", err) }
