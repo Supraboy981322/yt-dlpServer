@@ -24,30 +24,47 @@ func vLog(str string) {
 	}
 }
 
+//func to make sure config is ok
 func ensureConf() error {
+	//check file
 	_, err := os.Stat(confPath)
+	//check if it exists 
 	if errors.Is(err, os.ErrNotExist) {
+		//generate it if not
 		vLog("config doesn't exist; writing default")
 		err := os.WriteFile(confPath, defConf(), 0666)
 		if err != nil { return nil} else { vLog("no err") }
-	} else if err != nil { return nil }
+	} else if err != nil { return err }
 
+	//return no err 
 	vLog("ensured config")
 	return nil
 }
 
+//func that builds config 
 func defConf() []byte {
+	//first line of config
 	c := `["server"] := "`
-	var resp string
+	
+	//var to hold user input
+	var input string
+
+	//prompt user for server address
 	fmt.Print("please enter your server address:  ")
-	fmt.Scan(&resp)
-	fmt.Printf("\n")
-	vLog("setting server to"+resp)
-	c = c+resp+"\"\n"
+	fmt.Scan(&input) //read terminal input
+	fmt.Printf("\n") //print newline
+
+	vLog("setting server to"+input)
+
+	//add to config
+	c = c+input+"\"\n"
+
+	//print config if verbose 
 	vLog("config:")
 	for _, l := range strings.Split(c, "\n") {
 		vLog("\t"+l+"\033[F")
 	}
 
+	//return config as byte slice
 	return []byte(c)
 }
