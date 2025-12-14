@@ -27,7 +27,7 @@ A stripped-down version of [the toolbox thingy](https://github.com/Supraboy98132
   yT https://youtu.be/some-id -s your.server.address
   ```
 
-- Additional yt-dlp args
+- Additional yt-dlp args (replace `some random args` with your args)
   ```sh
   yT https://youtu.be/some-id -a some random args
   ```
