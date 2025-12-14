@@ -1,0 +1,3 @@
+["log level"] := "debug"
+["port"] := 4895
+["use web ui"] := false //TODO: web ui 
