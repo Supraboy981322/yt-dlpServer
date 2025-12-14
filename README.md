@@ -42,6 +42,10 @@ A stripped-down version of [the toolbox thingy](https://github.com/Supraboy98132
   yT -h
   ```
 
+#### cURL
+
+TODO: write cURL usage
+
 
 ## Installation
 
