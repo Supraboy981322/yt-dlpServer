@@ -218,10 +218,14 @@ func (pw *progWr) Write(p []byte) (n int, err error) {
 }
 
 func bytesToHumanReadable(b uint64) string {
+	if b >= 9223372036854775807 {
+		return fmt.Sprintf("greater than 9223.37 PB")
+	}
 	s := float64(b)
 	for _, f := range []string{"B", "KB", "MB", "GB", "TB"} {
 		if s < 1000.0 { return fmt.Sprintf("%.2f %s", s, f)
 		} else { s = s / 1000.0 }
 	}
-	return "<nil>"
+
+	return fmt.Sprintf("%.2f PB", s)
 }
