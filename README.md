@@ -51,17 +51,18 @@ TODO: write cURL usage
 
 #### Server
 
-1) Go install
+1) Ensure you have [`yt-dlp`](https://github.com/yt-dlp/yt-dlp) and ffmpeg installed and working on the server
+2) Go install
   ```sh
   go install github.com/Supraboy981322/yt-dlpServer/yt-dlpServer
   ```
-2) Create a config file named (`config.gomn` in the working directory for the server)
+3) Create a config file named (`config.gomn` in the working directory for the server)
   ```gomn
   ["log level"] := "debug"
   ["port"] := 4895
   ["use web ui"] := false //TODO: web ui 
   ```
-3) Create a systemd service file (`yt-dlpServer.service`) with the following contents (typically located in `/etc/systemd/system`, replace `/your/server/directory` with the directory for your server config, and `/your/gobin/path` with path that `yt-dlpServer` is installed to, may require `su`)
+4) Create a systemd service file (`yt-dlpServer.service`) with the following contents (typically located in `/etc/systemd/system`, replace `/your/server/directory` with the directory for your server config, and `/your/gobin/path` with path that `yt-dlpServer` is installed to, may require `su`)
   ```systemd
   [Unit]
   Description=yt-dlpServer
@@ -80,7 +81,7 @@ TODO: write cURL usage
   ```
   Or, your distro's equivalent
 
-4) Enable and start the systemd service (or your distro's equivalent, may require `su`)
+5) Enable and start the systemd service (or your distro's equivalent, may require `su`)
   ```sh
   systemctl enable yt-dlpServer.service
   systemctl start yt-dlpServer.service
