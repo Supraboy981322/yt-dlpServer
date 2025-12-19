@@ -24,6 +24,12 @@ func vLog(str string) {
 	}
 }
 
+func invArg(str string) {
+	vLog("found err...")
+	err := errors.New(str)
+	erorF("invalid arg", err)
+}
+
 //func to make sure config is ok
 func ensureConf() error {
 	//check file
@@ -67,4 +73,28 @@ func defConf() []byte {
 
 	//return config as byte slice
 	return []byte(c)
+}
+
+func help() {
+	lines := []string{
+		"yt-dlp server (working name) --> help",
+		"  -h, --help",
+		"    this screen",
+		"  -v, --verbose",
+		"    show verbose output",
+		"  -f, --format, --fmt",
+		"    file format",
+		"  -o, --output",
+		"    output file name (extension is appended to end, so don't put it here)",
+		"  -s, --server",
+		"    over-ride server address",
+		"  -a, --args, --extra-args",
+		"    additional args passed to yt-dlp on the server",
+		"  -u, -l, --url, --link, --video",
+		"    video url",
+	}
+	for _, l := range lines {
+		fmt.Println(l)
+	}
+	os.Exit(0)
 }

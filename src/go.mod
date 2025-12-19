@@ -1,4 +1,4 @@
-module yt-dls
+module yt-dlpServer
 
 go 1.25.4
 

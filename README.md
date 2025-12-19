@@ -1,6 +1,6 @@
-# yt-dls (working name)
+# yt-dlpServer
 
-A stripped-down version of [the toolbox thingy](https://github.com/Supraboy981322/toolbox) with just yt-dlp and a client
+A stripped-down version of [the toolbox thingy](https://github.com/Supraboy981322/toolbox) with just yt-dlp and a dedicated client cli tool
 
 
 ## Usage
