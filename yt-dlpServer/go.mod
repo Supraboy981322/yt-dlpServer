@@ -1,4 +1,4 @@
-module yt-dlpServer
+module github.com/Supraboy981322/yt-dlpServer/yt-dlpServer
 
 go 1.25.4
 

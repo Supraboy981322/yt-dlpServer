@@ -1,4 +1,4 @@
-module yT
+module github.com/Supraboy981322/yt-dlpServer/yT
 
 go 1.25.4
 
