@@ -69,7 +69,7 @@ TODO: write cURL usage
   
   [Service]
   WorkingDirectory=/your/server/directory
-  ExecStart=./yt-dlpServer
+  ExecStart=yt-dlpServer
   Restart=always
   User=root
   Group=root
