@@ -73,6 +73,10 @@ TODO: write cURL usage
   Restart=always
   User=root
   Group=root
+
+  [Install]
+  WantedBy=multi-user.target
+  Alias=yt-dlpServer.service
   ```
   Or, your distro's equivalent
 
