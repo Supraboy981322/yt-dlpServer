@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"errors"
 	"strings"
+	"path/filepath"
 )
 
 func eror(str string, err error) {
@@ -36,10 +37,11 @@ func ensureConf() error {
 	_, err := os.Stat(confPath)
 	//check if it exists 
 	if errors.Is(err, os.ErrNotExist) {
+		os.MkdirAll(filepath.Dir(confPath), 0766)
 		//generate it if not
 		vLog("config doesn't exist; writing default")
 		err := os.WriteFile(confPath, defConf(), 0666)
-		if err != nil { return nil} else { vLog("no err") }
+		if err != nil { return err } else { vLog("no err") }
 	} else if err != nil { return err }
 
 	//return no err 
@@ -49,6 +51,9 @@ func ensureConf() error {
 
 //func that builds config 
 func defConf() []byte {
+	fmt.Println("config not found")
+	fmt.Printf("  creating config ")
+	fmt.Println("(you will prompted for settings)")
 	//first line of config
 	c := `["server"] := "`
 	
@@ -56,7 +61,7 @@ func defConf() []byte {
 	var input string
 
 	//prompt user for server address
-	fmt.Print("please enter your server address:  ")
+	fmt.Print("\033[1;33mplease enter your server address:  \033[0m")
 	fmt.Scan(&input) //read terminal input
 	fmt.Printf("\n") //print newline
 
@@ -71,10 +76,12 @@ func defConf() []byte {
 		vLog("\t"+l+"\033[F")
 	}
 
+	fmt.Println("created config\n")
+
 	//return config as byte slice
 	return []byte(c)
 }
-
+	
 func help() {
 	lines := []string{
 		"yt-dlp server (working name) --> help",
@@ -98,3 +105,4 @@ func help() {
 	}
 	os.Exit(0)
 }
+
