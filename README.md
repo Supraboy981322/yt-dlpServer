@@ -61,7 +61,7 @@ TODO: write cURL usage
   ["port"] := 4895
   ["use web ui"] := false //TODO: web ui 
   ```
-3) Create a systemd service file (`yt-dlpServer.service`) with the following contents (typically located in `/etc/systemd/system`, replace `/your/server/directory` with the path to your server, may require `su`)
+3) Create a systemd service file (`yt-dlpServer.service`) with the following contents (typically located in `/etc/systemd/system`, replace `/your/server/directory` with the directory for your server config, and `/your/gobin/path` with path that `yt-dlpServer` is installed to, may require `su`)
   ```systemd
   [Unit]
   Description=yt-dlpServer
@@ -69,7 +69,7 @@ TODO: write cURL usage
   
   [Service]
   WorkingDirectory=/your/server/directory
-  ExecStart=yt-dlpServer
+  ExecStart=/your/gobin/path/yt-dlpServer
   Restart=always
   User=root
   Group=root
