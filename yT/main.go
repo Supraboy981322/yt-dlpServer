@@ -81,6 +81,18 @@ func init() {
 		erorF("invalid server address", err)
 	};vLog("got server address from config")
 
+	if extraArgsR, ok := conf["yt-dlp args"].([]interface{}); ok {
+		for _, aR := range extraArgsR {
+			if a, ok := aR.(string); !ok {
+				err := errors.New("not a string")
+				erorF("invalid config (\"yt-dlp args\")", err)
+			} else {
+				extraArgs = append(extraArgs, a)
+				fmt.Println(a)
+			}
+		};vLog("using extra args from config")
+	} else { vLog("no extra args provided in config") }
+
 	vLog("parsed config")
 
 	//parse args
@@ -107,7 +119,7 @@ func init() {
 				taken = append(taken, i+1)
 			} else { invArg("have output arg but no value") } 
 		 case "a", "-extra-args", "-args": //extra yt-dlp args
-		  extraArgs = args[i:]
+		  extraArgs = append(extraArgs, args[i:]...)
 			for j := i; j < len(args); j++	{
 				taken = append(taken, j)
 			}
