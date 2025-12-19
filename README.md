@@ -51,59 +51,48 @@ TODO: write cURL usage
 
 #### Server
 
-1) Download the latest build
+1) Go install
   ```sh
-  curl github.com/Supraboy981322/yt-dls/builds/server -O -J
+  go install github.com/Supraboy981322/yt-dlpServer/yt-dlpServer
   ```
-
-2) Make it executable (may require `su`)
-  ```sh
-  chmod a+x server
+2) Create a config file named (`config.gomn` in the working directory for the server)
+  ```gomn
+  ["log level"] := "debug"
+  ["port"] := 4895
+  ["use web ui"] := false //TODO: web ui 
   ```
-
-3) Create a systemd service file (`yt-dls.service`) with the following contents (typically located in `/etc/systemd/system`, replace `/your/server/path` with the path to your server, may require `su`)
+3) Create a systemd service file (`yt-dlpServer.service`) with the following contents (typically located in `/etc/systemd/system`, replace `/your/server/directory` with the path to your server, may require `su`)
   ```systemd
   [Unit]
-  Description=yt-dls
+  Description=yt-dlpServer
   After=network.target
   
   [Service]
-  WorkingDirectory=/your/server/path
-  ExecStart=./server
+  WorkingDirectory=/your/server/directory
+  ExecStart=./yt-dlpServer
   Restart=always
   User=root
   Group=root
   ```
   Or, your distro's equivalent
 
-3) Enable and start the systemd service (or your distro's equivalent, may require `su`)
+4) Enable and start the systemd service (or your distro's equivalent, may require `su`)
   ```sh
-  systemctl enable yt-dls.service
-  systemctl start yt-dls.service
+  systemctl enable yt-dlpServer.service
+  systemctl start yt-dlpServer.service
   ```
   You can ensure that the systemd service is working with this command
   ```sh
-  systemd status yt-dls.service
+  systemd status yt-dlpServer.service
   ```
+
 #### Client
 
-There are two ways to download the client
-
-1) Download the binary from the server (replace `your.server.address` with your server address)
+1) Using Go install
   ```sh
-  curl your.server.address/client-dl -o yT
+  go install github.com/Supraboy981322/yt-dlpServer/yT
   ```
-  Or, get the latest version from GitHub
+2) Run the client command, to create a configuration file (if it doesn't already exist)
   ```sh
-  curl github.com/Supraboy981322/yt-dls/builds/client/yT -O -J
-  ```
-
-2) Make it executable (may require `su`)
-  ```sh
-  chmod a+x yT
-  ```
-
-3) Move to somewhere in your path (eg: `/bin`, may require `su`)
-  ```sh
-  mv yT /bin/yT
+  yT
   ```
