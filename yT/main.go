@@ -184,7 +184,7 @@ func main() {
 	
 	//channel to send quit msg
 	quitProg := make(chan bool)
-	go func(){
+	go func(){ //activity spinner
 		progIcn := []rune{'⠻','⠽','⠾','⠷','⠯','⠟',}
 		for i := 0;; i++ {
 			//reset index to 0
