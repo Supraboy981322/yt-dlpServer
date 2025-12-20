@@ -54,7 +54,7 @@ TODO: write cURL usage
 1) Ensure you have [`yt-dlp`](https://github.com/yt-dlp/yt-dlp) and ffmpeg installed and working on the server
 2) Go install
   ```sh
-  go install github.com/Supraboy981322/yt-dlpServer/yt-dlpServer
+  go install github.com/Supraboy981322/yt-dlpServer/yt-dlpServer@latest
   ```
 3) Create a config file named (`config.gomn` in the working directory for the server)
   ```gomn
@@ -95,7 +95,7 @@ TODO: write cURL usage
 
 1) Using Go install
   ```sh
-  go install github.com/Supraboy981322/yt-dlpServer/yT
+  go install github.com/Supraboy981322/yt-dlpServer/yT@latest
   ```
 2) Run the client command, to create a configuration file (if it doesn't already exist)
   ```sh
