@@ -28,6 +28,7 @@ var (
 )
 
 type (
+	//progress writer
 	progWr struct {
 		Down uint64
 	}
@@ -82,6 +83,7 @@ func init() {
 		erorF("invalid server address", err)
 	};vLog("got server address from config")
 
+	//global extra args
 	if extraArgsR, ok := conf["yt-dlp args"].([]interface{}); ok {
 		for _, aR := range extraArgsR {
 			if a, ok := aR.(string); !ok {
@@ -96,7 +98,7 @@ func init() {
 
 	vLog("parsed config")
 
-	//parse args
+	//parse args (spagetti, I know)
 	var taken []int //used to track if arg aready parsed
 	for i, a := range args {
 		//skips arg if already used
@@ -151,21 +153,20 @@ func init() {
 }
 
 func main() {
+	//print server domain being used
 	fmt.Printf("using server:  %s\n", server)
 
+	//construct request
 	req, err := http.NewRequest("GET", server, nil)
 	if err != nil { erorF("failed to create request", err) }
 
-/*	req.Header.Set("fmt", format)
-	req.Header.Set("qual", quality)
-	req.Header.Set("url", url)
-	req.Header.Set("args", strings.Join(extraArgs, ";"))*/
-
+	//handle audio-only output 
 	if format == "" && slices.Contains(extraArgs, "-x") && quality == "" {
 		format = "webm"
 		quality = "bestaudio"
 	}
 
+	//map of header values and their keys 
 	argsMap := map[string]string {
 		"fmt": format,
 		"qual": quality,
@@ -173,92 +174,118 @@ func main() {
 		"args": strings.Join(extraArgs, ";"),
 	}
 
+	//range over said map of headers
 	for header, val := range argsMap {
 		req.Header.Set(header, val)
-		if val != "" {
+		if val != "" { //only print if set
 			fmt.Printf("%s:  %s\n", header, val)
 		}
-	};fmt.Printf("\n")
+	};fmt.Printf("\n") //start newline for activity spinner
 	
-	progChQuit := make(chan bool)
+	//channel to send quit msg
+	quitProg := make(chan bool)
 	go func(){
-		progIcn := []rune{'⠟','⠯','⠷','⠾','⠽','⠻',}
-		for i := len(progIcn)-1;; i--{
-			if i <= 0 { i = len(progIcn)-1 }
-			select {
-			case <- progChQuit:
+		progIcn := []rune{'⠻','⠽','⠾','⠷','⠯','⠟',}
+		for i := 0;; i++ {
+			//reset index to 0
+			if i >= len(progIcn) { i = 0 }
+			select { //handle channel comms.
+       case <- quitProg:
+				//move cursor up one line and
+				//  clear it before returning
 				fmt.Printf("\033[A\033[2K\033[0m")
 				return
-			default:
-				fmt.Printf("\033[A\033[2K\033[1;34m"+
-							" %s\033[0;1m "+
+	     default:
+				//ansii code to manipulate cursor and use color
+				fmt.Printf("\033[A\033[2K\033[1;34m %s\033[0;1m "+
 							"Making request...\033[0m\n", string(progIcn[i]))
+				//wait 100 milliseconds (looks nicer)
 				time.Sleep(100 * time.Millisecond)
 			}
 		}
 	}()
 
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	//actually do request
+	client := &http.Client{} //create client
+	resp, err := client.Do(req) //make request
 	if err != nil { erorF("\033[Aerr making request", err) }
-	defer resp.Body.Close()
+	defer resp.Body.Close() //keep body open
 
+	//check for server err
 	if resp.StatusCode != http.StatusOK {
+		//assume server only sent err 
+		//  in body (as opposed to binary)
 		bod, err := io.ReadAll(resp.Body)
 		if err != nil { eror("\033[Aerr reading response body", err) }
-		err = errors.New(string(bod))
+
+		//if no err was sent, use status code
 		if bod == nil {
 			bod = []byte(fmt.Sprintf("(%d): %s", resp.StatusCode, resp.Status))
-			err = errors.New(string(bod))
 		}
+
+		//print err
+		err = errors.New(string(bod))
 		erorF("\033[Aserver reported bad status code", err)
 	} else { vLog("response status: "+resp.Status) }
 
-	if output == "--" {
+	if output == "--" { /* TODO: print binary to stdout */
 		erorF("\033[ATODO:", errors.New("output to stdout"))
-	} else if output == "" {
+	} else if output == "" { //if no output arg
+		//get the suggested file name
 		oR := resp.Header.Get("Content-Disposition")
 		oR = strings.Split(oR, ";")[1]
 		oR = strings.Split(oR, "=")[1]
+		//set output to suggested filename
 		output = oR[1:len(oR)-1]
 	}
 
-	progChQuit <- true
+	//stop activity spinner
+	quitProg <- true
 
+	//print output filename
 	fmt.Printf("\033[2K\033[1moutputing to:  \033[0;35m%s\033[0m\n\n", output)
 
+	//create progress writer
 	pw := &progWr{}
 
+	//create output file
 	out, err := os.Create(output)
 	if err != nil { erorF("failed to create output file", err) }
-	defer out.Close()
+	defer out.Close() //hold output file open
 
 	reader := io.TeeReader(resp.Body, pw)
 
 	_, err = io.Copy(out, reader)
 	if err != nil { erorF("err streaming to output", err) }
 
+	//print in a human-readable format (i.e. not just bytes)
 	fmt.Printf("\n\033[1;32mdone. total: \033[1;34m%s\033[0m\n",
 					bytesToHumanReadable(pw.Down))
 }
 
 func (pw *progWr) Write(p []byte) (n int, err error) {
-	n = len(p)
-	pw.Down += uint64(n)
-	dlSize := bytesToHumanReadable(pw.Down)
+	n = len(p) //number of bytes
+	pw.Down += uint64(n) //add to amnt downloaded
+	dlSize := bytesToHumanReadable(pw.Down) //convert to a human-readable format
+
+	//print it in a way that looks appealing
 	fmt.Printf("\033[A;2K\033[1m\rdownloaded \033[1;34m%s\033[0;1m ....\033[0m\n", dlSize)
-	return n, nil
+	return n, nil //return num bytes
 }
 
 func bytesToHumanReadable(b uint64) string {
+	//if stupidly large, don't even process it
 	if b >= 9223372036854775807 {
-		return fmt.Sprintf("greater than 9223.37 PB")
+		return fmt.Sprintf("greater than 9.22 EB")
 	}
+
+	//find best measurement
 	s := float64(b)
-	for _, f := range []string{"B", "KB", "MB", "GB", "TB"} {
+	for _, f := range []string{"B", "KB", "MB", "GB", "TB", "PB"} {
 		if s < 1000.0 { return fmt.Sprintf("%.2f %s", s, f)
 		} else { s = s / 1000.0 }
 	}
 
-	return fmt.Sprintf("%.2f PB", s)
+	//otherwise, it's in exabytes
+	return fmt.Sprintf("%.2f EB", s)
 }
