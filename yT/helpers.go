@@ -9,6 +9,7 @@ import (
 )
 
 func eror(str string, err error) {
+	fmt.Printf("\033[2K")
 	str = fmt.Sprintf("\033[1;30;41m%s\033[0m", str)
 	err = fmt.Errorf("    \033[1;31m%v\033[0m", err)
 	fmt.Fprintf(os.Stderr, "%s\n%v\n", str, err)

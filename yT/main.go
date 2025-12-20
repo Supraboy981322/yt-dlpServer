@@ -4,6 +4,7 @@ import (
 	"os"
 	"io"
 	"fmt"
+	"time"
 	"errors"
 	"slices"
 	"strings"
@@ -177,26 +178,44 @@ func main() {
 		if val != "" {
 			fmt.Printf("%s:  %s\n", header, val)
 		}
-	}
+	};fmt.Printf("\n")
+	
+	progChQuit := make(chan bool)
+	go func(){
+		progIcn := []rune{'⠟','⠯','⠷','⠾','⠽','⠻',}
+		for i := 0;; i++{
+			if i >= len(progIcn) { i = 0 }
+			select {
+			case <- progChQuit:
+				fmt.Printf("\033[A\033[2K\033[0m")
+				return
+			default:
+				fmt.Printf("\033[A\033[2K\033[1;34m"+
+							" %s\033[0;1m "+
+							"Making request...\033[0m\n", string(progIcn[i]))
+				time.Sleep(100 * time.Millisecond)
+			}
+		}
+	}()
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
-	if err != nil { erorF("err making request", err) }
+	if err != nil { erorF("\033[Aerr making request", err) }
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		bod, err := io.ReadAll(resp.Body)
-		if err != nil { eror("err reading response body", err) }
+		if err != nil { eror("\033[Aerr reading response body", err) }
 		err = errors.New(string(bod))
 		if bod == nil {
 			bod = []byte(fmt.Sprintf("(%d): %s", resp.StatusCode, resp.Status))
 			err = errors.New(string(bod))
 		}
-		erorF("server reported bad status code", err)
+		erorF("\033[Aserver reported bad status code", err)
 	} else { vLog("response status: "+resp.Status) }
 
 	if output == "--" {
-		erorF("TODO:", errors.New("output to stdout"))
+		erorF("\033[ATODO:", errors.New("output to stdout"))
 	} else if output == "" {
 		oR := resp.Header.Get("Content-Disposition")
 		oR = strings.Split(oR, ";")[1]
@@ -204,7 +223,9 @@ func main() {
 		output = oR[1:len(oR)-1]
 	}
 
-	fmt.Printf("\033[1moutputing to:  \033[0;35m%s\033[0m\n\n", output)
+	progChQuit <- true
+
+	fmt.Printf("\033[2K\033[1moutputing to:  \033[0;35m%s\033[0m\n\n", output)
 
 	pw := &progWr{}
 
