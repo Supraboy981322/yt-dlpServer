@@ -143,7 +143,7 @@ func init() {
 			//check if it's the url
 			if url == "" { url = a
 			} else {
-				err := fmt.Errorf("%s used as url, but url is already set to %s", a, url)
+				err := fmt.Errorf("\"%s\" used as url, but url is already set to \"%s\"", a, url)
 				invArg(err.Error())
 			}
 		}
