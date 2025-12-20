@@ -183,8 +183,8 @@ func main() {
 	progChQuit := make(chan bool)
 	go func(){
 		progIcn := []rune{'⠟','⠯','⠷','⠾','⠽','⠻',}
-		for i := 0;; i++{
-			if i >= len(progIcn) { i = 0 }
+		for i := len(progIcn)-1;; i--{
+			if i <= 0 { i = len(progIcn)-1 }
 			select {
 			case <- progChQuit:
 				fmt.Printf("\033[A\033[2K\033[0m")
