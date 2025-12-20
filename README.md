@@ -22,9 +22,9 @@ A stripped-down version of [the toolbox thingy](https://github.com/Supraboy98132
   yT https://youtu.be/some-id -o foo
   ```
 
-- Over-ride server address set in config (replace `your.server.address`)
+- Over-ride server address set in config (replace `https://your.server.address`)
   ```sh
-  yT https://youtu.be/some-id -s your.server.address
+  yT https://youtu.be/some-id -s https://your.server.address
   ```
 
 - Additional yt-dlp args (replace `some random args` with your args)
