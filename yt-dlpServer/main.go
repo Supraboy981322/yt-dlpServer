@@ -99,16 +99,6 @@ func ytDlp(w http.ResponseWriter, r *http.Request) {
 	format := chkHeaders([]string{
 			"fmt", "format", "f",
 		}, "webm", r)
-	
-	outHeader := fmt.Sprintf("attachment; filename=\"yt-dlpServer_%s.%s\"",
-				time.Now().Format("2006-01-02_15-04-05"), format)
-	w.Header().Set("Content-Disposition", outHeader)
-
-	//get quality arg from headers
-	//  defaults to `bestvideo+bestaudio/best`
-	quality := chkHeaders([]string{
-			"quality", "qual", "q",
-		}, "bestvideo+bestaudio/best", r)
 
 	//get the url from headers,
 	//  with fallback to the req body
@@ -118,12 +108,71 @@ func ytDlp(w http.ResponseWriter, r *http.Request) {
 			"v",
 		}, getBodyNoErr(r), r)
 
+	filename := fmt.Sprintf("yt-dlpServer_%s", 
+					time.Now().Format("2006-01-02_15-04-05"))
+	if chkHeaders([]string{
+		"vName", "vN", "videoName"}, "", r) != "" {
+		
+		log.Debug("getting filename")
+
+		cmd := exec.Command("yt-dlp", "--get-filename",
+					"-qo", "\"%(title)s\"", "--no-warnings", url)
+
+		var stdout, stderr bytes.Buffer
+		cmd.Stderr = &stderr
+		cmd.Stdout = &stdout
+
+		if err := cmd.Start(); err != nil { 
+			log.Error(stderr.String())
+			http.Error(w, "failed to start yt-dlp", srvErr)
+			return
+		}
+		
+		if err := cmd.Wait(); err != nil {
+			//err buffer to string 
+			errMsg := stderr.String() 
+	
+			var indx int
+			for _, l := range strings.Split(errMsg, "\n") {
+				//remove the error type part
+				//  of yt-dlp output
+				indx = strings.IndexRune(l, ':')
+				if indx == -1 { continue }
+				errTyp := l[0:indx]
+				errMsg = l[indx+1:]
+				if errTyp == "ERROR" { break }
+			}
+	
+			//remove newline
+			//  (yt-dlp inserts double newline)
+			errMsg = strings.ReplaceAll(errMsg, "\n", "")
+	
+			//send err
+			http.Error(w, errMsg, srvErr)
+			log.Error(errMsg)
+			return
+		}
+
+		videoName := stdout.String()
+		videoName = videoName[1:len(videoName)-2]
+		filename = videoName
+	}
+
+	outHeader := fmt.Sprintf(
+				"attachment; filename=\"%s.%s\"", filename, format)
+	w.Header().Set("Content-Disposition", outHeader)
+
+	//get quality arg from headers
+	//  defaults to `bestvideo+bestaudio/best`
+	quality := chkHeaders([]string{
+			"quality", "qual", "q",
+		}, "bestvideo+bestaudio/best", r)
+
   extraArgsR := chkHeaders([]string{
       "a", "args", "arg",
     }, "", r)
 
   extraArgs := strings.Split(extraArgsR, ";")
-	fmt.Println(extraArgs)
 
 	//quickly return err if no url 
 	if url == "" {
