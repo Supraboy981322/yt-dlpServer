@@ -43,6 +43,10 @@ func ensureConf() error {
 		vLog("config doesn't exist; writing default")
 		err := os.WriteFile(confPath, defConf(), 0666)
 		if err != nil { return err } else { vLog("no err") }
+    fmt.Println("setup complete")
+    fmt.Print("\n\trun the command again to use it\n")
+    fmt.Println("\tfor usage, see: '\033[33myT\033[36m --help\033[0m'\n")
+    os.Exit(0)
 	} else if err != nil { return err }
 
 	//return no err 
