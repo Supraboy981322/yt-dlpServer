@@ -22,6 +22,7 @@ var (
 	format string      //holds output format
 	quality string     //holds output quality
 	confPath string    //holds path of config
+	useVideoName bool  //used to request video name as suggested filename
 	args = os.Args[1:] //cmd args
 	extraArgs []string //holds extra args passed to yt-dlp
 	projName = "yt-dlpServer"//used for config path
@@ -83,6 +84,11 @@ func init() {
 		erorF("invalid server address", err)
 	};vLog("got server address from config")
 
+	vLog("checking \"use video name\" bool in config")
+	if useVideoName, ok = conf["use video name"].(bool); !ok {
+		vLog("\"use video name\" in config is either not bool or not present, ignoring")
+	} else { vLog("using video name as suggested file name") }
+
 	//global extra args
 	if extraArgsR, ok := conf["yt-dlp args"].([]interface{}); ok {
 		for _, aR := range extraArgsR {
@@ -139,6 +145,8 @@ func init() {
 				quality = args[i+1]
 				taken = append(taken, i+1)
 			} else { invArg("have quality arg, but no value") }
+		 case "V", "-use-video-name":
+		 	useVideoName = true
 		 default:
 			//check if it's the url
 			if url == "" { url = a
@@ -171,8 +179,9 @@ func main() {
 		"fmt": format,
 		"qual": quality,
 		"url": url,
+		"use-video-name": "",
 		"args": strings.Join(extraArgs, ";"),
-	}
+	};if useVideoName { argsMap["use-video-name"] = "true" }
 
 	//range over said map of headers
 	for header, val := range argsMap {
