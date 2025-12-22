@@ -102,6 +102,8 @@ func help() {
 		"    over-ride server address",
 		"  -a, --args, --extra-args",
 		"    additional args passed to yt-dlp on the server",
+		"  -V, --use-video-title",
+		"    request server to suggest the video's title as the filename",
 		"  -u, -l, --url, --link, --video",
 		"    video url",
 	}
