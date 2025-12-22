@@ -111,7 +111,7 @@ func ytDlp(w http.ResponseWriter, r *http.Request) {
 	filename := fmt.Sprintf("yt-dlpServer_%s", 
 					time.Now().Format("2006-01-02_15-04-05"))
 	if chkHeaders([]string{
-		"vName", "vN", "videoName", "use video name"}, "", r) != "" {
+		"vName", "vN", "videoName", "use-video-name"}, "", r) != "" {
 		
 		log.Debug("getting filename")
 
