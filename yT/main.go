@@ -157,6 +157,7 @@ func init() {
 		}
 	}
 
+	if len(extraArgs) > 1 { extraArgs = extraArgs[1:] }
 	if url == "" { invArg("need url")	}
 }
 
