@@ -92,6 +92,8 @@ func help() {
 		"yt-dlp server (working name) --> help",
 		"  -h, --help",
 		"    this screen",
+		"  -x, --audio-only",
+		"    only download audio",
 		"  -v, --verbose",
 		"    show verbose output",
 		"  -f, --format, --fmt",
