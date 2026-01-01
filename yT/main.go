@@ -19,6 +19,7 @@ var (
 	output string      //holds output file path (or stdout/stderr)
 	server string      //holds server address 
 	conf gomn.Map      //holds config 
+	playlist bool      //determines whether to treat as a playlist
 	format string      //holds output format
 	quality string     //holds output quality
 	confPath string    //holds path of config
@@ -112,6 +113,7 @@ func init() {
 		if isTak { continue } //skips arg
 
 		switch a[1:] {
+		 case "L", "-playlist": playlist = true
 		 case "f", "-format", "-fmt": //output file format
 			if len(args)-1 >= i+1 {
 				format = args[i+1]
@@ -159,9 +161,26 @@ func init() {
 
 	if len(extraArgs) > 1 { extraArgs = extraArgs[1:] }
 	if url == "" { invArg("need url")	}
+
+	if !playlist {
+		params := strings.Split(strings.Split(url, "?")[1], "&")
+		for _, p :=  range params {
+			n := strings.Split(p, "=")
+			if len(n) < 2 { continue }
+			if strings.Contains(n[0], "list") {	playlist = true ; break }
+		} 
+	}
 }
 
 func main() {
+	if playlist {
+		dlFromPlaylist(url)
+	} else {
+		dl()
+	}
+}
+
+func dl() {
 	//print server domain being used
 	fmt.Printf("using server:  %s\n", server)
 

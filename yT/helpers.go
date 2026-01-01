@@ -1,10 +1,13 @@
 package main
 
 import (
+	"io"
 	"os"
 	"fmt"
+	"time"
 	"errors"
 	"strings"
+	"net/http"
 	"path/filepath"
 )
 
@@ -115,3 +118,65 @@ func help() {
 	os.Exit(0)
 }
 
+func dlFromPlaylist(url string) {
+	fmt.Println("")
+	//construct request
+	req, err := http.NewRequest("GET", server, nil)
+	if err != nil { erorF("failed to create request", err) }
+	req.Header.Set("list-playlist", "true")
+	req.Header.Set("url", url)
+
+	//channel to send quit msg
+	quitProg := make(chan bool)
+	go func(){ //activity spinner
+		progIcn := []rune{'⠻','⠽','⠾','⠷','⠯','⠟',}
+		for i := 0;; i++ {
+			//reset index to 0
+			if i >= len(progIcn) { i = 0 }
+			select { //handle channel comms.
+       case <- quitProg:
+				//move cursor up one line and
+				//  clear it before returning
+				fmt.Printf("\033[A\033[2K\033[0m")
+				return
+	     default:
+				//ansii code to manipulate cursor and use color
+				fmt.Printf("\033[A\033[2K\033[1;34m %s\033[0;1m "+
+							"Making request...\033[0m\n", string(progIcn[i]))
+				//wait 100 milliseconds (looks nicer)
+				time.Sleep(100 * time.Millisecond)
+			}
+		}
+	}()
+
+	//actually do request
+	client := &http.Client{} //create client
+	resp, err := client.Do(req) //make request
+	if err != nil { erorF("\033[Aerr making request", err) }
+	defer resp.Body.Close() //keep body open
+
+	//assume server only sent list 
+	//  in body (as opposed to binary)
+	bod, err := io.ReadAll(resp.Body)
+	if err != nil { eror("\033[Aerr reading response body", err) }
+
+	if resp.StatusCode != http.StatusOK {
+		//if no err was sent, use status code
+		if bod == nil {
+			bod = []byte(fmt.Sprintf("(%d): %s", resp.StatusCode, resp.Status))
+		}
+		//print err
+		err = errors.New(string(bod))
+		erorF("\033[Aserver reported bad status code", err)
+	}
+
+	quitProg<-true
+	listR := string(bod)
+	list := strings.Split(listR, "\n")
+	if list[len(list)-1] == "" { list = list[:len(list)-1] }
+	for i, v := range list {
+		fmt.Printf("\n\n\033[1;35mstarting\033[0m \033[38;2;255;165;0m%d\033[0m"+
+			" \033[1;35mof\033[0m \033[38;2;155;165;0m%d\033[0m\n", i+1, len(list))
+		url = v ;	dl()
+	}
+}
