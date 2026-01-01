@@ -90,6 +90,35 @@ func webHan(w http.ResponseWriter, r *http.Request) {
 }
 
 func ytDlp(w http.ResponseWriter, r *http.Request) {
+	//get the url from headers,
+	//  with fallback to the req body
+	url := chkHeaders([]string{
+			"url", "source", "src", "addr",
+			"u", "address", "video", "song",
+			"v",
+		}, getBodyNoErr(r), r)
+
+	//quickly return err if no url 
+	if url == "" {
+		http.Error(w, "no url provided", http.StatusBadRequest)
+		return
+	}
+
+	if r.Header.Get("list_playlist") != "" {
+		w.Header().Set("Content-Type", "text/plain")
+		var out_buf bytes.Buffer
+		cmd := exec.Command("yt-dlp", "-qo", "--no-warnings", "--get-id",
+						"--flat-playlist", url)
+		cmd.Stdout = &out_buf
+		cmd.Stderr = os.Stderr
+		if err := cmd.Run(); err != nil {
+			http.Error(w, err.Error(), 500)
+			log.Error(err.Error())
+			return
+		}
+		w.Write([]byte(out_buf.String()))
+		return
+	}
 	//let client know it's about to 
 	//  recieve raw binary data
 	w.Header().Set("Content-Type", "application./octet-stream")
@@ -99,14 +128,6 @@ func ytDlp(w http.ResponseWriter, r *http.Request) {
 	format := chkHeaders([]string{
 			"fmt", "format", "f",
 		}, "webm", r)
-
-	//get the url from headers,
-	//  with fallback to the req body
-	url := chkHeaders([]string{
-			"url", "source", "src", "addr",
-			"u", "address", "video", "song",
-			"v",
-		}, getBodyNoErr(r), r)
 
 	filename := fmt.Sprintf("yt-dlpServer_%s", 
 					time.Now().Format("2006-01-02_15-04-05"))
