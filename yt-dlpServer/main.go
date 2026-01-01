@@ -104,7 +104,7 @@ func ytDlp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if r.Header.Get("list_playlist") != "" {
+	if r.Header.Get("list-playlist") != "" {
 		w.Header().Set("Content-Type", "text/plain")
 		var out_buf bytes.Buffer
 		cmd := exec.Command("yt-dlp", "-qo", "--no-warnings", "--get-id",
