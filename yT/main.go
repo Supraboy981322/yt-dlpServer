@@ -163,12 +163,15 @@ func init() {
 	if url == "" { invArg("need url")	}
 
 	if !playlist {
-		params := strings.Split(strings.Split(url, "?")[1], "&")
-		for _, p :=  range params {
-			n := strings.Split(p, "=")
-			if len(n) < 2 { continue }
-			if strings.Contains(n[0], "list") {	playlist = true ; break }
-		} 
+		params := strings.Split(url, "?")
+		if len(params) > 2 {
+			params = strings.Split(params[1], "&")
+			for _, p :=  range params {
+				n := strings.Split(p, "=")
+				if len(n) < 2 { continue }
+				if strings.Contains(n[0], "list") {	playlist = true ; break }
+			}
+		}
 	}
 }
 
