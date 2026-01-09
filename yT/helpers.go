@@ -204,6 +204,7 @@ func listPlaylist(url string) []string {
 }
 
 func dlList(list []string) {
+	fmt.Println("\033[3A")
 	for i, v := range list {
 		fmt.Printf("\n\n\033[1;35mstarting\033[0m \033[38;2;255;165;0m%d\033[0m"+
 			" \033[1;35mof\033[0m \033[38;2;155;165;0m%d\033[0m\n", i+1, len(list))
@@ -221,5 +222,12 @@ func dlFromFile(file string) {
 	fi, err := os.ReadFile(file)
 	if err != nil { erorF("failed to read file", err) }
 
-	fmt.Printf("%T\n", fi)
+	var l []string
+	for _, lR := range strings.Split(string(fi), "\n") {
+		lR = strings.TrimSpace(lR)
+		if lR == "" { continue }
+		l = append(l, lR)
+	}
+
+	dlList(l)
 }
