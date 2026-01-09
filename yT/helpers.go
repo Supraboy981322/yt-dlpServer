@@ -118,8 +118,34 @@ func help() {
 	os.Exit(0)
 }
 
-func dlFromPlaylist(url string) {
-	fmt.Println("")
+func bytesToHumanReadable(b uint64) string {
+	//if stupidly large, don't even process it
+	if b >= 9223372036854775807 {
+		return fmt.Sprintf("greater than 9.22 EB")
+	}
+
+	//find best measurement
+	s := float64(b)
+	for _, f := range []string{"B", "KB", "MB", "GB", "TB", "PB"} {
+		if s < 1000.0 { return fmt.Sprintf("%.2f %s", s, f)
+		} else { s = s / 1000.0 }
+	}
+
+	//otherwise, it's in exabytes
+	return fmt.Sprintf("%.2f EB", s)
+}
+
+func (pw *progWr) Write(p []byte) (n int, err error) {
+	n = len(p) //number of bytes
+	pw.Down += uint64(n) //add to amnt downloaded
+	dlSize := bytesToHumanReadable(pw.Down) //convert to a human-readable format
+
+	//print it in a way that looks appealing
+	fmt.Printf("\033[A;2K\033[1m\rdownloaded \033[1;34m%s\033[0;1m ....\033[0m\n", dlSize)
+	return n, nil //return num bytes
+}
+
+func listPlaylist(url string) []string {
 	//construct request
 	req, err := http.NewRequest("GET", server, nil)
 	if err != nil { erorF("failed to create request", err) }
@@ -173,10 +199,27 @@ func dlFromPlaylist(url string) {
 	quitProg<-true
 	listR := string(bod)
 	list := strings.Split(listR, "\n")
-	if list[len(list)-1] == "" { list = list[:len(list)-1] }
+
+	return list
+}
+
+func dlList(list []string) {
 	for i, v := range list {
 		fmt.Printf("\n\n\033[1;35mstarting\033[0m \033[38;2;255;165;0m%d\033[0m"+
 			" \033[1;35mof\033[0m \033[38;2;155;165;0m%d\033[0m\n", i+1, len(list))
 		url = v ;	dl()
 	}
+} 
+
+func dlFromPlaylist(url string) {
+	list := listPlaylist(url)
+	if list[len(list)-1] == "" { list = list[:len(list)-1] } 
+	dlList(list)
+}
+
+func dlFromFile(file string) {
+	fi, err := os.ReadFile(file)
+	if err != nil { erorF("failed to read file", err) }
+
+	fmt.Printf("%T\n", fi)
 }
